@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 /Encryptor.code-workspace
 /encryptor_venv
+/todo.txt
