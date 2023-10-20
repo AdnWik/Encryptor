@@ -1,4 +1,5 @@
 import argparse
+import logging
 
 
 parser = argparse.ArgumentParser()
@@ -26,3 +27,16 @@ parser.add_argument("-p", "--password", help="password to app")
 
 args = parser.parse_args()
 print(args)
+
+LVL_MAPPING = {
+    0: 50,  # CRITICAL
+    1: 40,  # ERROR
+    2: 20,  # INFO
+    3: 10   # DEBUG
+}
+
+logging.getLogger().setLevel(LVL_MAPPING[args.v])
+
+logging.error('This')
+logging.info('is')
+logging.debug('a test')
