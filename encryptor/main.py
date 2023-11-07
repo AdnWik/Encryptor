@@ -1,7 +1,8 @@
 import argparse
 import logging
 from os import getcwd
-import pathlib
+from os import walk, listdir, makedirs
+from shutil import rmtree
 from my_secret import MySecret
 
 # INITIAL VALUES
@@ -65,3 +66,20 @@ if args.file:
 
 else:
     logging.debug("FOLDER")
+
+
+target = "result"
+if target in listdir('.'):
+    rmtree(target)
+
+for path, directories, files in walk('Poland'):
+    makedirs(f'{target}/{path}')
+    for file in files:
+        with open(f'{path}/{file}', 'r', encoding='utf-8') as file_unsafe:
+            context = file_unsafe.read()
+            secret.safe_context = secret.encrypt_content(context)
+            logging.debug(f'Original content: {context}')
+            logging.debug(f'Safe content: {secret.safe_context}')
+
+        with open(f'{target}/{path}/{file}', 'w', encoding='utf-8') as file_safe:
+            file_safe.write(secret.safe_context)

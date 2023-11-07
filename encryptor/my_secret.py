@@ -18,3 +18,12 @@ class MySecret:
 
     def decrypt_folder(self, folder):
         pass
+
+    def encrypt_content(self, content):
+        safe_content = self.encryptor.encrypt(content)
+        safe_content = safe_content.decode('utf-8')
+        return safe_content
+
+    def decrypt_content(self, content):
+        unsafe_content = self.encryptor.decrypt(content)
+        return unsafe_content
