@@ -161,5 +161,7 @@ cython_debug/
 /Encryptor.code-workspace
 /encryptor_venv
 /todo.txt
-/Poland
-/result
+/sample_file
+/result_file
+/result_folder
+/sample_folder
