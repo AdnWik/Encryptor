@@ -1,17 +1,25 @@
 import argparse
 import logging
 import os
-from shutil import rmtree
 from my_secret import MySecret
 
 
-def dir_path(string):
-    logging.debug(f'STRING: {string}')
-    if os.path.exists(string):
-        return string
-    else:
-        #os.mkdir(string)
-        raise (NotADirectoryError(string))
+def dir_path(string) -> str:
+    """Check path is exists
+
+    Args:
+        string (_type_): path to check
+
+    Raises:
+        NotADirectoryError: path isn't exists
+
+    Returns:
+        str: correct patch
+    """
+    logging.debug('STRING: %s', string)
+    if not os.path.exists(string):
+        raise NotADirectoryError(string)
+    return string
 
 
 # INITIAL VALUES
@@ -54,6 +62,7 @@ parser.add_argument(
     "-m",
     "--mode",
     choices=["encrypt", "decrypt"],
+    type=str,
     help="operation mode"
     )
 
@@ -64,46 +73,33 @@ parser.add_argument(
     )
 
 args = parser.parse_args()
+logging.basicConfig(format='%(message)s')
 logging.getLogger().setLevel(LVL_MAPPING[args.v])
+logging.debug("Input args : %s", args)
+
+
+START_FOLDERS = ['sample_file', 'sample_folder']
+
+for location in START_FOLDERS:
+    location = '..\\' + location
+    if not os.path.exists(location):
+        os.mkdir(location)
+
+secret = MySecret()
 
 # MAIN PROGRAM
-print(args)
-secret = MySecret()
-if args.file:
-    logging.debug("FILE")
-    target = "..\\result_file"
-    file = args.file.split("\\")
+if args.mode == "encrypt":
+    logging.debug("ENCRYPT")
+    if args.file:
+        logging.debug("FILE")
 
-    if os.path.exists(target):
-        rmtree(target)
+        target = "..\\result_file"
+        secret.encrypt_file(args, target)
 
-    os.mkdir(f'{target}')
-    with open(args.file, 'r', encoding='utf-8') as file_unsafe:
-        context = file_unsafe.read()
-        secret.safe_context = secret.encrypt_content(context)
-        logging.debug(f'Original content: {context}')
-        logging.debug(f'Safe content: {secret.safe_context}')
+    elif args.folder:
+        logging.debug("FOLDER")
+        target = "..\\result_folder"
+        secret.encrypt_folder(args, target)
 
-    with open(f'{target}/{file[-1]}', 'w', encoding='utf-8') as file_safe:
-        file_safe.write(secret.safe_context)
-
-elif args.folder:
-    logging.debug("FOLDER")
-    target = "..\\result_folder"
-    folder = args.folder.split("\\")
-    if os.path.exists(target):
-        rmtree(target)
-
-    for path, directories, files in os.walk(args.folder):
-        if path.startswith(".."):
-            new_path = path[2:]
-        os.makedirs(f'{target}/{new_path}')
-        for file in files:
-            with open(f'{path}/{file}', 'r', encoding='utf-8') as file_unsafe:
-                context = file_unsafe.read()
-                secret.safe_context = secret.encrypt_content(context)
-                logging.debug(f'Original content: {context}')
-                logging.debug(f'Safe content: {secret.safe_context}')
-
-            with open(f'{target}/{new_path}/{file}', 'w', encoding='utf-8') as file_safe:
-                file_safe.write(secret.safe_context)
+elif args.mode == "decrypt":
+    logging.debug("DECRYPT")

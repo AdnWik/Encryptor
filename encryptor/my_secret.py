@@ -1,3 +1,6 @@
+import os
+import logging
+from shutil import rmtree
 from encryptor import Encryptor
 
 
@@ -7,11 +10,40 @@ class MySecret:
         self.encryptor = Encryptor()
         self.safe_context = ''
 
-    def encrypt_file(self, file):
-        pass
+    def encrypt_file(self, args, target):
+        print(args)
+        file = args.file.split("\\")
+        print(file)
+        if os.path.exists(target):
+            rmtree(target)
 
-    def encrypt_folder(self, folder):
-        pass
+        os.mkdir(f'{target}')
+        with open(args.file, 'r', encoding='utf-8') as file_unsafe:
+            context = file_unsafe.read()
+            self.safe_context = self.encrypt_content(context)
+            logging.debug('Original content: %s', context)
+            logging.debug('Safe content: %s', self.safe_context)
+
+        with open(f'{target}/{file[-1]}', 'w', encoding='utf-8') as file_safe:
+            file_safe.write(self.safe_context)
+
+    def encrypt_folder(self, args, target):
+        if os.path.exists(target):
+            rmtree(target)
+
+        for path, directories, files in os.walk(args.folder):
+            if path.startswith(".."):
+                new_path = path[2:]
+            os.makedirs(f'{target}/{new_path}')
+            for file in files:
+                with open(f'{path}/{file}', 'r', encoding='utf-8') as file_unsafe:
+                    context = file_unsafe.read()
+                    self.safe_context = self.encrypt_content(context)
+                    logging.debug('Original content: %s', context)
+                    logging.debug('Safe content: %s', self.safe_context)
+
+                with open(f'{target}/{new_path}/{file}', 'w', encoding='utf-8') as file_safe:
+                    file_safe.write(self.safe_context)
 
     def decrypt_file(self, file):
         pass
