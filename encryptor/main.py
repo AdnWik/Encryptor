@@ -30,7 +30,7 @@ LVL_MAPPING = {
     3: 10   # DEBUG
 }
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description='Decrypt encrypt APP')
 group_1 = parser.add_mutually_exclusive_group()
 group_2 = parser.add_mutually_exclusive_group()
 
