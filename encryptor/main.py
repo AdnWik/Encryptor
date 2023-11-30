@@ -1,7 +1,7 @@
 import argparse
 import logging
 import os
-from my_secret import MySecret
+from secret import MySecret
 
 
 def dir_path(string) -> str:

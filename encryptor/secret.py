@@ -1,13 +1,13 @@
 import os
 import logging
 from shutil import rmtree
-from encryptor import Encryptor
+from crypto import Encryptor
 
 
 class MySecret:
 
     def __init__(self) -> None:
-        self.encryptor = Encryptor()
+        self.crypto = Encryptor()
         self.safe_context = ''
 
     def encrypt_file(self, args, target):
@@ -52,10 +52,10 @@ class MySecret:
         pass
 
     def encrypt_content(self, content):
-        safe_content = self.encryptor.encrypt(content)
+        safe_content = self.crypto.encrypt(content)
         safe_content = safe_content.decode('utf-8')
         return safe_content
 
     def decrypt_content(self, content):
-        unsafe_content = self.encryptor.decrypt(content)
+        unsafe_content = self.crypto.decrypt(content)
         return unsafe_content
