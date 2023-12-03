@@ -6,9 +6,13 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
 
 
-class Encryptor:
+class Crypto:
 
-    def __init__(self) -> None:
+    def __init__(self, path) -> None:
+        self.path = path
+
+    @staticmethod
+    def crete_key(password):
         load_dotenv()
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -16,16 +20,36 @@ class Encryptor:
             salt=getenv('SALT').encode('utf-8'),
             iterations=480000
             )
-        self.token = Fernet(
-            base64.urlsafe_b64encode(
-                kdf.derive(getenv('PASSWORD').encode('utf-8'))
-                )
-            )
+        key = base64.urlsafe_b64encode(
+            kdf.derive(password.encode('utf-8')))
+        return key
 
-    def encrypt(self, content):
-        safe_content = self.token.encrypt(content.encode('utf-8'))
-        return safe_content
 
-    def decrypt(self, safe_content):
-        decoded_content = self.token.decrypt(safe_content).decode('utf-8')
-        return decoded_content
+class Encrypt(Crypto):
+    def __init__(self, path) -> None:
+        super().__init__(path)
+
+    def execute(self, password):
+        with open(self.path, 'r') as file:
+            data_to_encrypt = file.read()
+
+        fernet = Fernet(self.crete_key(password))
+        encrypted_content = fernet.encrypt(data_to_encrypt.encode('utf-8'))
+
+        with open(self.path.rename(self.path.with_suffix('.code_aw')), 'w') as file:
+            file.write(encrypted_content.decode('utf-8'))
+
+
+class Decrypt(Crypto):
+    def __init__(self, path) -> None:
+        super().__init__(path)
+
+    def execute(self, password):
+        with open(self.path, 'r') as file:
+            data_to_decrypt = file.read()
+
+        fernet = Fernet(self.crete_key(password))
+        decrypted_content = fernet.decrypt(data_to_decrypt)
+
+        with open(self.path.rename(self.path.with_suffix('.txt')), 'w') as file:
+            file.write(decrypted_content.decode('utf-8'))

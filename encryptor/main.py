@@ -1,7 +1,9 @@
 import argparse
 import logging
 import os
-from secret import MySecret
+import pathlib
+from cryptography.fernet import InvalidToken
+from crypto import Encrypt, Decrypt
 
 
 def dir_path(string) -> str:
@@ -48,12 +50,14 @@ group_1.add_argument(
     )
 
 group_2.add_argument(
+    "-f",
     "--file",
     action="store",
     type=dir_path
     )
 group_2.add_argument(
-    "--folder",
+    "-d",
+    "--directory",
     action="store",
     type=str
     )
@@ -77,7 +81,7 @@ logging.basicConfig(format='%(message)s')
 logging.getLogger().setLevel(LVL_MAPPING[args.v])
 logging.debug("Input args : %s", args)
 
-
+# INIT SAMPLE FOLDERS
 START_FOLDERS = ['sample_file', 'sample_folder']
 
 for location in START_FOLDERS:
@@ -85,21 +89,45 @@ for location in START_FOLDERS:
     if not os.path.exists(location):
         os.mkdir(location)
 
-secret = MySecret()
-
 # MAIN PROGRAM
-if args.mode == "encrypt":
-    logging.debug("ENCRYPT")
-    if args.file:
-        logging.debug("FILE")
+try:
+    # ENCRYPT
+    if args.mode == "encrypt":
+        logging.debug("ENCRYPT")
 
-        target = "..\\result_file"
-        secret.encrypt_file(args, target)
+        # FILE / FILES
+        if args.file:
+            path = pathlib.Path(args.file)
+            logging.debug("FILE")
+            file = Encrypt(path)
+            file.execute(args.password)
 
-    elif args.folder:
-        logging.debug("FOLDER")
-        target = "..\\result_folder"
-        secret.encrypt_folder(args, target)
+            logging.debug("OK")
 
-elif args.mode == "decrypt":
-    logging.debug("DECRYPT")
+        # DIRECTORY
+        elif args.folder:
+            logging.debug("DIRECTORY")
+            # TODO:
+            # target = "..\\result_folder"
+
+    # DECRYPT
+    elif args.mode == "decrypt":
+        logging.debug("DECRYPT")
+
+        # FILE / FILES
+        if args.file:
+            path = pathlib.Path(args.file)
+            logging.debug("FILE")
+            file = Decrypt(path)
+            file.execute(args.password)
+
+            logging.debug("OK")
+
+        # DIRECTORY
+        elif args.folder:
+            logging.debug("DIRECTORY")
+            # TODO:
+            # target = "..\\result_folder"
+
+except InvalidToken:
+    logging.error('INVALID TOKEN')
