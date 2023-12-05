@@ -5,14 +5,14 @@ import pathlib
 from time import time
 from tqdm import tqdm
 from cryptography.fernet import InvalidToken
-from crypto import Encrypt, Decrypt
+from crypto import Encrypt, Decrypt, Append
 
 
 def main(args):
     # MAIN PROGRAM
-    start = time()
     try:
         # FILE / FILES
+        password = args.password
         if args.file:
 
             files_to_process = args.file
@@ -22,11 +22,20 @@ def main(args):
                 file = pathlib.Path(file)
 
                 if args.mode == "encrypt":
-                    action = Encrypt(file)
-                elif args.mode == "decrypt":
-                    action = Decrypt(file)
+                    start = time()
+                    action = Encrypt(file, password)
 
-                action.execute(args.password)
+                elif args.mode == "decrypt":
+                    start = time()
+                    action = Decrypt(file, password)
+
+                elif args.mode == "append":
+                    print("Enter data to append: ")
+                    data_to_append = f'\n{input(">>> ")}'
+                    start = time()
+                    action = Append(file, password, data_to_append)
+
+                action.execute()
                 stop = time()
                 process_time = stop - start
                 verbose(file, process_time, files_to_process)
@@ -117,7 +126,7 @@ group_2.add_argument(
 parser.add_argument(
     "-m",
     "--mode",
-    choices=["encrypt", "decrypt"],
+    choices=["encrypt", "decrypt", "append"],
     type=str,
     help="operation mode"
     )
