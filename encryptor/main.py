@@ -1,11 +1,23 @@
 import argparse
+from argparse import ArgumentParser, Namespace
+from collections.abc import Sequence
+import getpass
 import logging
 import os
 import pathlib
 from time import time
+from typing import Sequence, Any
 from tqdm import tqdm
 from cryptography.fernet import InvalidToken
 from crypto import Encrypt, Decrypt, Append
+
+
+class Password(argparse.Action):
+    def __call__(self, parser: ArgumentParser, namespace: Namespace, values: str, optional_string) -> None:
+        if values is None:
+            values = getpass.getpass()
+
+        setattr(namespace, self.dest, values)
 
 
 def main(args):
@@ -109,6 +121,7 @@ group_1.add_argument(
     default=0,
     help="available verbose level (1,2,3)"
     )
+
 group_1.add_argument(
     "-q",
     "--quiet",
@@ -141,7 +154,10 @@ parser.add_argument(
     "-p",
     "--password",
     help="password to app",
-    required=True
+    required=True,
+    nargs='?',
+    dest='password',
+    action=Password
     )
 
 args = parser.parse_args()
