@@ -14,10 +14,20 @@ def main(args):
         # FILE / FILES
         password = args.password
         if args.file:
-
             files_to_process = args.file
+
+        # DIRECTORY
+        elif args.directory:
+            files_to_process = []
+            for path, _, files in os.walk(args.directory):
+                if files:
+                    files_to_process.append(path + '\\' + files[0])
+
+        # PROCESS
+        if files_to_process:
             if args.verbose == 3:
-                files_to_process = tqdm(args.file)
+                files_to_process = tqdm(files_to_process)
+
             for file in files_to_process:
                 file = pathlib.Path(file)
 
@@ -39,11 +49,6 @@ def main(args):
                 stop = time()
                 process_time = stop - start
                 verbose(file, process_time, files_to_process)
-
-        # DIRECTORY
-        elif args.folder:
-            # TODO:
-            pass
 
     except InvalidToken:
         print("INVALID TOKEN")
@@ -116,6 +121,7 @@ group_2.add_argument(
     action="append",
     type=str
     )
+
 group_2.add_argument(
     "-d",
     "--directory",
@@ -134,9 +140,9 @@ parser.add_argument(
 parser.add_argument(
     "-p",
     "--password",
-    help="password to app"
+    help="password to app",
+    required=True
     )
 
 args = parser.parse_args()
-
 main(args)
